@@ -1,0 +1,15 @@
+package edu.utm.tmps.Lab1.enums;
+
+public enum FlavorsEnum {
+    STRAWBERRY_SWIRL,
+    BLUEBERRY_LEMON,
+    KEY_LIME,
+    DARK_CHOCOLATE,
+    MOCHA_ESPRESSO,
+    CHOCOLATE_MINT,
+    GERMAN_CHOCOLATE,
+    CLASSIC_VANILLA,
+    RED_VELVET,
+    ALMOND_BUTTERCREAM,
+    CHAMPAGNE_STRAWBERRY
+}
