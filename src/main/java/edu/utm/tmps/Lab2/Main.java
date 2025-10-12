@@ -2,13 +2,16 @@ package edu.utm.tmps.Lab2;
 
 public class Main {
     public static void main(String[] args) {
-        // Creating Type B plug
+        // Abstract Factory
         PlugFactory typeBPlugFactory = new TypeBPlugFactory();
-        Plug typeBPlug = new TypeBPlug();
-        Builder typeBPlugBuilder = new TypeBPlug();
-        PlugSpecification typeBPlugSpecification = typeBPlugFactory.createSpecification();
+
+        // Factory Method internally uses Builder to construct plug
+        Plug typeBPlug = typeBPlugFactory.createPlug();
         typeBPlug.produce();
-        typeBPlugBuilder.getPlug();
-        typeBPlugSpecification.displaySpecifications();
+        typeBPlug.displayDetails();
+
+        // Abstract Factory creates Specification
+        PlugSpecification typeBPlugSpec = typeBPlugFactory.createSpecification();
+        typeBPlugSpec.displaySpecifications();
     }
 }
