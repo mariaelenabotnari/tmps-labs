@@ -1,4 +1,6 @@
-package edu.utm.tmps.Lab2;
+package edu.utm.tmps.Lab2.builder;
+
+import edu.utm.tmps.Lab2.models.Plug;
 
 public interface Builder {
     void buildName();
