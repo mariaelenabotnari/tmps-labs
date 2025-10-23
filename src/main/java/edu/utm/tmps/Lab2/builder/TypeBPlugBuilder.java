@@ -37,7 +37,7 @@ public class TypeBPlugBuilder implements Builder {
 
     @Override
     public void buildSafetyFeature() {
-        typeBPlug.setSafetyFeature("Polarization (Neutral blade is wider than the hot blade)");
+        typeBPlug.setSafetyFeature("Polarization (Neutral blade is wider than the hot blade)\n");
     }
 
     @Override

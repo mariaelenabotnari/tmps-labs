@@ -18,29 +18,18 @@ These patterns include several common approaches such as Singleton, Builder, Fac
 ---
 # Implementation
 
-The **abstract factory design pattern** provides a way to create families of related objects without specifying their exact concrete classes. It is useful when a system needs to work with multiple products that belong to the same group but must remain independent from the specific classes used to create those products. The abstract factory defines an interface for creating these related objects, ensuring that each product family remains consistent. This makes it easier to introduce new types or categories of related objects without changing the existing creation logic or client code.
+The **factory method design pattern** provides a way to create objects without specifying their exact classes. Instead of creating objects directly with the `new` keyword, the pattern defines a common interface for creating them, and lets each subclass decide which object to create. This makes it easier to introduce new types of products without changing the main code that uses them. It also helps keep the code clean and flexible, because the logic for creating objects is separated from the logic that uses those objects. In this project, the factory method pattern is used to create different types of plugs in a consistent way.
 
-In the project, the abstract factory pattern was implemented through the `PlugFactory` interface, which serves as the abstract factory, and through its concrete class `TypeBPlugFactory`. The factory is responsible for creating two related objects: the plug itself and its specification. By calling `createPlug()` and `createSpecification()`, both the `Plug` and `PlugSpecification` objects are created in a consistent way, ensuring that they belong to the same product family: in this case, the Type B plug. This approach keeps the code flexible, because other factories like `TypeFPlugFactory` and `TypeGPlugFactory` can be added easily without changing how the main program requests new plugs or specifications.
+The pattern is implemented through the `PlugFactory` interface, which declares the `createPlug()` method. Each concrete factory class, such as `TypeBPlugFactory`, `TypeFPlugFactory`, and `TypeGPlugFactory`, implements this interface and creates a specific type of plug. Inside each factory, the `Builder` and `PlugDirector` classes are used to handle the detailed construction steps of each plug. This way, the main program can request different plug types through the same interface, without knowing how they are built. For example, the code below shows how the client creates and uses a plug with the factory method.
 
 ```java
 public class Main {
     public static void main(String[] args) {
-        PlugFactory typeBPlugFactory = new TypeBPlugFactory();
+        PlugFactory typeBFactory = new TypeBPlugFactory();
 
-        Plug typeBPlug = typeBPlugFactory.createPlug();
+        Plug typeBPlug = typeBFactory.createPlug();
         typeBPlug.produce();
         typeBPlug.displayDetails();
-
-        PlugSpecification typeBPlugSpec = typeBPlugFactory.createSpecification();
-        typeBPlugSpec.displaySpecifications();
-    }
-}
-
-public class TypeBPlugSpecification implements PlugSpecification {
-    @Override
-    public void displaySpecifications() {
-        System.out.println("Type B Plugs are produced in North America. "
-            + "Specs: low voltage, 2 flat parallel blades, uninsulated.");
     }
 }
 ```
@@ -173,6 +162,6 @@ Type G Plugs are produced in UK/Ireland. Specs: high voltage, 3 large rectangula
 
 # Conclusion
 
-During this laboratory work, the main goal was to understand and apply creational design patterns in practice. These patterns helped organize the process of creating objects in a clear and flexible way. By using patterns such as Factory Method, Abstract Factory, Builder, and Singleton, the creation of objects became more controlled and independent from the rest of the program. This made the code easier to modify and extend in the future without affecting other parts of the system. The work also showed how important it is to separate object creation from object usage to keep the design simple and maintainable.
+During this laboratory work, the main goal was to understand and apply creational design patterns in practice. These patterns helped organize the process of creating objects in a clear and flexible way. By using patterns such as Factory Method, Builder, and Singleton, the creation of objects became more controlled and independent from the rest of the program. This made the code easier to modify and extend in the future without affecting other parts of the system. The work also showed how important it is to separate object creation from object usage to keep the design simple and maintainable.
 
-Through this project, the connection between theory and practice became clearer. Each pattern served a specific purpose: the Factory patterns managed which type of plug was created, the Builder controlled how each plug was assembled step by step, and the Singleton ensured only one instance of the PlugDirector existed. Together, these design patterns created a well-structured and reusable codebase. The laboratory work successfully demonstrated how creational design patterns can simplify complex systems, improve flexibility, and support cleaner software architecture.
+Through this project, the connection between theory and practice became clearer. Each pattern served a specific purpose: the Factory pattern managed which type of plug was created, the Builder controlled how each plug was assembled step by step, and the Singleton ensured only one instance of the PlugDirector existed. Together, these design patterns created a well-structured and reusable codebase. The laboratory work successfully demonstrated how creational design patterns can simplify complex systems, improve flexibility, and support cleaner software architecture.

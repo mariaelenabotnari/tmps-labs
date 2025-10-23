@@ -37,7 +37,7 @@ public class TypeGPlugBuilder implements Builder {
 
     @Override
     public void buildSafetyFeature() {
-        typeGPlug.setSafetyFeature("Mandatory Fuse inside the plug; socket has safety shutters");
+        typeGPlug.setSafetyFeature("Mandatory Fuse inside the plug; socket has safety shutters\n");
     }
 
     @Override
