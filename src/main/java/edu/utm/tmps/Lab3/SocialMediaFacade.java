@@ -33,6 +33,7 @@ public class SocialMediaFacade {
         commands.put("3", this::searchPost);
         commands.put("4", this::viewFeed);
         commands.put("5", this::logout);
+        commands.put("6", this::editProfilePicture);
     }
 
     public void run() {
@@ -47,12 +48,13 @@ public class SocialMediaFacade {
 
         while (loggedInUser != null) {
             System.out.println("""
-                    Choose an option:
+                    \nChoose an option:
                     1. Create Post
                     2. View My Posts
                     3. Search Post
                     4. View Feed
                     5. Logout
+                    6. Edit Profile Picture
                     """);
 
             String choice = scanner.nextLine();
@@ -104,4 +106,49 @@ public class SocialMediaFacade {
         System.out.println("Goodbye " + loggedInUser.getUsername());
         loggedInUser = null;
     }
+
+    private void editProfilePicture() {
+        Scanner sc = new Scanner(System.in);
+
+        IProfileService baseProfile = loggedInUser.getProfileService();
+
+        FilterDecorator filterDecorator = new FilterDecorator(baseProfile);
+        ResizeDecorator resizeDecorator = new ResizeDecorator(filterDecorator);
+
+        System.out.println("Enter profile picture filename (e.g. pic.png):");
+        String picture = sc.nextLine();
+
+        resizeDecorator.addProfilePicture(picture);
+
+        System.out.println("""
+            Resize options:
+            1. Make smaller
+            2. Make bigger
+            """);
+
+        String resizeChoice = sc.nextLine();
+        if (resizeChoice.equals("1")) {
+            resizeDecorator.resizeSmaller();
+        } else if (resizeChoice.equals("2")) {
+            resizeDecorator.resizeBigger();
+        }
+
+        List<String> filters = List.of("sepia", "black-and-white", "smooth", "retro", "warm");
+        System.out.println("Available filters:");
+        for (int i = 0; i < filters.size(); i++) {
+            System.out.println((i + 1) + ". " + filters.get(i));
+        }
+
+        System.out.println("Choose filter number:");
+        int filterChoice = Integer.parseInt(sc.nextLine());
+        String chosenFilter = filters.get(filterChoice - 1);
+
+        filterDecorator.applyFilter(chosenFilter);
+
+        System.out.println("\nFinal profile:");
+        resizeDecorator.displayProfile();
+
+        System.out.println("\nProfile updated successfully!");
+    }
+
 }
