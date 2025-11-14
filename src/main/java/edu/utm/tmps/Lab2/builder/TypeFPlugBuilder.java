@@ -37,7 +37,7 @@ public class TypeFPlugBuilder implements Builder {
 
     @Override
     public void buildSafetyFeature() {
-        typeFPlug.setSafetyFeature("None (Plugs can be inserted in two orientations)\n");
+        typeFPlug.setSafetyFeature("None\n");
     }
 
     @Override
