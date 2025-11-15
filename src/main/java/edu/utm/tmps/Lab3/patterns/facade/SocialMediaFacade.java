@@ -1,13 +1,26 @@
-package edu.utm.tmps.Lab3;
+package edu.utm.tmps.Lab3.patterns.facade;
+
+import edu.utm.tmps.Lab3.model.Post;
+import edu.utm.tmps.Lab3.model.User;
+import edu.utm.tmps.Lab3.patterns.decorator.FilterDecorator;
+import edu.utm.tmps.Lab3.patterns.decorator.ResizeDecorator;
+import edu.utm.tmps.Lab3.patterns.factory.ImagePostFactory;
+import edu.utm.tmps.Lab3.patterns.factory.PostFactory;
+import edu.utm.tmps.Lab3.patterns.factory.TextPostFactory;
+import edu.utm.tmps.Lab3.patterns.factory.VideoPostFactory;
+import edu.utm.tmps.Lab3.service.*;
 
 import java.util.*;
 
 public class SocialMediaFacade {
 
+    private static SocialMediaFacade instance;
+
     private final IUserService userService;
     private final IPostService postService;
     private final IFeedService feedService;
     private final INotificationService notificationService;
+    private final Map<String, PostFactory> postFactories = new HashMap<>();
 
     private User loggedInUser;
 
@@ -25,6 +38,21 @@ public class SocialMediaFacade {
         this.notificationService = notificationService;
 
         initializeCommands();
+        initializePostFactories();
+    }
+
+    public static synchronized SocialMediaFacade getInstance(
+            IUserService userService,
+            IPostService postService,
+            IFeedService feedService,
+            INotificationService notificationService
+    ) {
+        if (instance == null) {
+            instance = new SocialMediaFacade(
+                    userService, postService, feedService, notificationService
+            );
+        }
+        return instance;
     }
 
     private void initializeCommands() {
@@ -34,6 +62,12 @@ public class SocialMediaFacade {
         commands.put("4", this::viewFeed);
         commands.put("5", this::logout);
         commands.put("6", this::editProfilePicture);
+    }
+
+    private void initializePostFactories() {
+        postFactories.put("1", new TextPostFactory());
+        postFactories.put("2", new ImagePostFactory());
+        postFactories.put("3", new VideoPostFactory());
     }
 
     public void run() {
@@ -70,13 +104,28 @@ public class SocialMediaFacade {
 
     private void createPost() {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Enter post content:");
+
+        System.out.println("""
+            Choose post type:
+            1. Text post
+            2. Image post
+            3. Video post
+            """);
+        String typeChoice = sc.nextLine();
+
+        PostFactory factory = postFactories.get(typeChoice);
+        if (factory == null) {
+            System.out.println("Invalid post type.");
+            return;
+        }
+
+        System.out.println("Enter post content (text or image URL/path):");
         String content = sc.nextLine();
 
-        Post post = postService.createPost(loggedInUser.getId(), content);
+        Post post = postService.createPost(loggedInUser.getId(), content, factory);
         notificationService.sendNotification(loggedInUser, "Your post was published!");
 
-        System.out.println("Post created: " + post.getContent());
+        post.displayPost();
     }
 
     private void viewOwnPosts() {

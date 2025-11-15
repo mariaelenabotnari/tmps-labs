@@ -1,19 +1,17 @@
-package edu.utm.tmps.Lab3;
+package edu.utm.tmps.Lab3.model;
+
+import edu.utm.tmps.Lab3.service.IProfileService;
+import edu.utm.tmps.Lab3.service.ProfileService;
 
 public class User {
     private String id;
     private String username;
-    private ProfileInfo profileInfo;
     private IProfileService profileService;
 
-    public User(String id, String username) {
+    public User(String id, String username, ProfileInfo profileInfo) {
         this.id = id;
         this.username = username;
-
-        profileInfo = new ProfileInfo();
-        profileInfo.userId = id;
-        profileInfo.username = username;
-        profileService = new ProfileService(profileInfo);
+        this.profileService = new ProfileService(profileInfo);
     }
 
     public String getId() {

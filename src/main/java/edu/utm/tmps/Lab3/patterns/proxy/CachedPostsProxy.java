@@ -1,4 +1,7 @@
-package edu.utm.tmps.Lab3;
+package edu.utm.tmps.Lab3.patterns.proxy;
+
+import edu.utm.tmps.Lab3.model.Post;
+import edu.utm.tmps.Lab3.service.IFeedService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,5 +50,11 @@ public class CachedPostsProxy implements IFeedService {
             System.out.println("Cache HIT: searching post " + postId + " from cache.");
         }
         return cachedSearch.get(postId);
+    }
+
+    public void clearCache() {
+        cachedAll = null;
+        cachedByUser.clear();
+        cachedSearch.clear();
     }
 }

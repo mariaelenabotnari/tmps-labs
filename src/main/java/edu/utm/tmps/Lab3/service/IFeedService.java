@@ -1,4 +1,6 @@
-package edu.utm.tmps.Lab3;
+package edu.utm.tmps.Lab3.service;
+
+import edu.utm.tmps.Lab3.model.Post;
 
 import java.util.ArrayList;
 

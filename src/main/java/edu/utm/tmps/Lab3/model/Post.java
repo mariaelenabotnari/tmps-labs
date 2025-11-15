@@ -1,19 +1,21 @@
-package edu.utm.tmps.Lab3;
+package edu.utm.tmps.Lab3.model;
 
 import java.time.LocalDateTime;
 
-public class Post {
-    private String id;
-    private String userId;
-    private String content;
-    private LocalDateTime createdAt;
+public abstract class Post {
+    protected String id;
+    protected String userId;
+    protected String content;
+    protected LocalDateTime createdAt;
 
-    public Post(String id, String userId, String content) {
+    protected Post(String id, String userId, String content) {
         this.id = id;
         this.userId = userId;
         this.content = content;
         this.createdAt = LocalDateTime.now();
     }
+
+    public abstract void displayPost();
 
     public String getId() {
         return id;

@@ -1,17 +1,27 @@
 package edu.utm.tmps.Lab3;
 
+import edu.utm.tmps.Lab3.patterns.facade.SocialMediaFacade;
+import edu.utm.tmps.Lab3.patterns.proxy.CachedPostsProxy;
+import edu.utm.tmps.Lab3.service.*;
+
 public class Client {
     public static void main(String[] args) {
 
-        IPostService postService = new PostService();
-        IFeedService feedService = new CachedPostsProxy(new FeedService(postService));
+        PostService postService = new PostService();
+
+        CachedPostsProxy proxy = new CachedPostsProxy(new FeedService(postService));
+
+        postService.setCacheProxy(proxy);
+
+        IFeedService feedService = proxy;
         IUserService userService = new UserService();
         INotificationService notificationService = new NotificationService();
 
-        SocialMediaFacade app = new SocialMediaFacade(
+        SocialMediaFacade app = SocialMediaFacade.getInstance(
                 userService, postService, feedService, notificationService
         );
 
         app.run();
     }
+
 }

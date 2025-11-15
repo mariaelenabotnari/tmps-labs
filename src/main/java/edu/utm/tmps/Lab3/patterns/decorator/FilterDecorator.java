@@ -1,4 +1,6 @@
-package edu.utm.tmps.Lab3;
+package edu.utm.tmps.Lab3.patterns.decorator;
+
+import edu.utm.tmps.Lab3.service.IProfileService;
 
 public class FilterDecorator extends ProfileDecorator {
 
