@@ -1,6 +1,6 @@
 package edu.utm.tmps.Lab3.domain.service;
 
-import edu.utm.tmps.Lab3.domain.model.User;
+import edu.utm.tmps.Lab3.observer.User;
 
 public class NotificationService implements INotificationService {
     @Override
