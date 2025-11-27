@@ -1,4 +1,4 @@
-package edu.utm.tmps.Lab3.observer;
+package edu.utm.tmps.Lab3.domain.observer;
 
 import edu.utm.tmps.Lab3.domain.model.ProfileInfo;
 import edu.utm.tmps.Lab3.domain.service.IProfilePictureService;

@@ -2,10 +2,9 @@ package edu.utm.tmps.Lab3.domain.service;
 
 import edu.utm.tmps.Lab3.domain.builder.ProfileBuilder;
 import edu.utm.tmps.Lab3.domain.model.ProfileInfo;
-import edu.utm.tmps.Lab3.observer.User;
+import edu.utm.tmps.Lab3.domain.observer.User;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class UserService implements IUserService {
     private HashMap<String, User> users = new HashMap<>();

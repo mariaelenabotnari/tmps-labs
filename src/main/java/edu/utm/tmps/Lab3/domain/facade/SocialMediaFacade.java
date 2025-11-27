@@ -1,7 +1,9 @@
 package edu.utm.tmps.Lab3.domain.facade;
 
+import edu.utm.tmps.Lab3.domain.command.CommandInvoker;
+import edu.utm.tmps.Lab3.domain.command.LikePostCommand;
 import edu.utm.tmps.Lab3.domain.model.Post;
-import edu.utm.tmps.Lab3.observer.User;
+import edu.utm.tmps.Lab3.domain.observer.User;
 import edu.utm.tmps.Lab3.domain.decorator.FilterDecorator;
 import edu.utm.tmps.Lab3.domain.decorator.ResizeDecorator;
 import edu.utm.tmps.Lab3.domain.factory.ImagePostFactory;
@@ -20,6 +22,7 @@ public class SocialMediaFacade {
     private final IPostService postService;
     private final IFeedService feedService;
     private final INotificationService notificationService;
+    private final CommandInvoker commandInvoker = new CommandInvoker();
     private final Map<String, PostFactory> postFactories = new HashMap<>();
 
     private User loggedInUser;
@@ -65,6 +68,9 @@ public class SocialMediaFacade {
         commands.put("7", this::editProfileDetails);
         commands.put("8", this::viewProfile);
         commands.put("9", this::followUser);
+        commands.put("10", this::likePost);
+        commands.put("11", this::undoLastAction);
+        commands.put("12", this::showActivity);
     }
 
     private void initializePostFactories() {
@@ -110,6 +116,9 @@ public class SocialMediaFacade {
                     7. Edit Profile Details
                     8. View Profile Info
                     9. Follow User
+                    10. Like a Post
+                    11. Undo Last Action
+                    12. View Posts Liked History
                     0. Exit
                     """);
 
@@ -403,4 +412,29 @@ public class SocialMediaFacade {
         System.out.println("You are now following " + target.getUsername());
     }
 
+    private void likePost() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter post ID to like:");
+        String id = scanner.nextLine();
+
+        Post post = feedService.searchPost(id);
+        if (post == null) {
+            System.out.println("Post not found.");
+            return;
+        }
+
+        LikePostCommand cmd = new LikePostCommand(post, loggedInUser);
+        commandInvoker.executeCommand(loggedInUser.getId(), cmd);
+        if (cmd.wasExecuted()) {
+            notificationService.sendNotification(loggedInUser, "The post was liked successfully.");
+        }
+    }
+
+    private void undoLastAction() {
+        commandInvoker.undoLast(loggedInUser.getId());
+    }
+
+    private void showActivity() {
+        commandInvoker.showHistory(loggedInUser.getId());
+    }
 }
