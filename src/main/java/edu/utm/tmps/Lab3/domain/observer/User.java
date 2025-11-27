@@ -11,7 +11,9 @@ public class User implements IObserver, ISubject {
     private String id;
     private String username;
     private IProfilePictureService profileService;
+
     private final List<IObserver> followers = new ArrayList<>();
+    private final List<User> following = new ArrayList<>();
 
     public User(String id, String username, ProfileInfo profileInfo) {
         this.id = id;
@@ -43,6 +45,7 @@ public class User implements IObserver, ISubject {
 
     public void follow(User userToFollow) {
         userToFollow.registerObserver(this);
+        following.add(userToFollow);
     }
 
     public String getId() {
@@ -55,5 +58,9 @@ public class User implements IObserver, ISubject {
 
     public IProfilePictureService getProfileService() {
         return profileService;
+    }
+
+    public List<User> getFollowing() {
+        return following;
     }
 }

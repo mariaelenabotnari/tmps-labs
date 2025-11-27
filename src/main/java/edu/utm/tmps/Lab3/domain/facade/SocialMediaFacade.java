@@ -11,6 +11,8 @@ import edu.utm.tmps.Lab3.domain.factory.PostFactory;
 import edu.utm.tmps.Lab3.domain.factory.TextPostFactory;
 import edu.utm.tmps.Lab3.domain.factory.VideoPostFactory;
 import edu.utm.tmps.Lab3.domain.service.*;
+import edu.utm.tmps.Lab3.domain.strategy.SortByFollowingOnlyStrategy;
+import edu.utm.tmps.Lab3.domain.strategy.SortByNewestStrategy;
 
 import java.util.*;
 
@@ -22,6 +24,7 @@ public class SocialMediaFacade {
     private final IPostService postService;
     private final IFeedService feedService;
     private final INotificationService notificationService;
+
     private final CommandInvoker commandInvoker = new CommandInvoker();
     private final Map<String, PostFactory> postFactories = new HashMap<>();
 
@@ -71,6 +74,7 @@ public class SocialMediaFacade {
         commands.put("10", this::likePost);
         commands.put("11", this::undoLastAction);
         commands.put("12", this::showActivity);
+        commands.put("13", this::changeFeedSorting);
     }
 
     private void initializePostFactories() {
@@ -117,8 +121,9 @@ public class SocialMediaFacade {
                     8. View Profile Info
                     9. Follow User
                     10. Like a Post
-                    11. Undo Last Action
+                    11. Dislike Last Post Liked
                     12. View Posts Liked History
+                    13. Change feed sorting
                     0. Exit
                     """);
 
@@ -206,7 +211,7 @@ public class SocialMediaFacade {
 
     private void viewFeed() {
         System.out.println("Your feed:");
-        ArrayList<Post> posts = feedService.retrieveAllPosts();
+        ArrayList<Post> posts = feedService.retrieveFeed(loggedInUser);
         posts.forEach(p -> System.out.println(p.getUserId() + ": " + p.getContent()));
     }
 
@@ -437,4 +442,27 @@ public class SocialMediaFacade {
     private void showActivity() {
         commandInvoker.showHistory(loggedInUser.getId());
     }
+
+    private void changeFeedSorting() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("""
+    Choose feed sorting:
+    1. Newest posts
+    2. Only posts from users you follow
+    """);
+
+        String choice = scanner.nextLine();
+
+        switch (choice) {
+            case "1" -> feedService.setSortingStrategy(new SortByNewestStrategy());
+            case "2" -> feedService.setSortingStrategy(new SortByFollowingOnlyStrategy());
+            default -> {
+                System.out.println("Invalid choice.");
+                return;
+            }
+        }
+
+        System.out.println("Sorting updated!");
+    }
+
 }
