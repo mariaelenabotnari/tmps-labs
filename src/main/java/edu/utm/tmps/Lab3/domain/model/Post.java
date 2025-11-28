@@ -1,7 +1,5 @@
 package edu.utm.tmps.Lab3.domain.model;
 
-import edu.utm.tmps.Lab3.domain.observer.User;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,30 +16,6 @@ public abstract class Post {
         this.userId = userId;
         this.content = content;
         this.createdAt = LocalDateTime.now();
-    }
-
-    public boolean addLike(User user) {
-        if (this.userId.equals(user.getId())) {
-            System.out.println("You cannot like your own post.");
-            return false;
-        }
-
-        if (likedUsers.contains(user.getId())) {
-            System.out.println("You already liked this post.");
-            return false;
-        }
-        likedUsers.add(user.getId());
-        System.out.println(user.getUsername() + " liked this post.");
-        return true;
-    }
-
-    public boolean removeLike(User user) {
-        if (!likedUsers.contains(user.getId())) {
-            return false;
-        }
-        likedUsers.remove(user.getId());
-        System.out.println(user.getUsername() + " unliked this post.");
-        return true;
     }
 
     public int getLikes() {
@@ -68,5 +42,9 @@ public abstract class Post {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public Set<String> getLikedUsers() {
+        return likedUsers;
     }
 }

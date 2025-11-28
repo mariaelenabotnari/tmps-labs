@@ -2,8 +2,9 @@ package edu.utm.tmps.Lab3.domain.facade;
 
 import edu.utm.tmps.Lab3.domain.command.CommandInvoker;
 import edu.utm.tmps.Lab3.domain.command.LikePostCommand;
+import edu.utm.tmps.Lab3.domain.command.LikePostService;
 import edu.utm.tmps.Lab3.domain.model.Post;
-import edu.utm.tmps.Lab3.domain.observer.User;
+import edu.utm.tmps.Lab3.domain.model.User;
 import edu.utm.tmps.Lab3.domain.decorator.FilterDecorator;
 import edu.utm.tmps.Lab3.domain.decorator.ResizeDecorator;
 import edu.utm.tmps.Lab3.domain.factory.ImagePostFactory;
@@ -24,7 +25,7 @@ public class SocialMediaFacade {
     private final IPostService postService;
     private final IFeedService feedService;
     private final INotificationService notificationService;
-
+    private final LikePostService likeService = new LikePostService();
     private final CommandInvoker commandInvoker = new CommandInvoker();
     private final Map<String, PostFactory> postFactories = new HashMap<>();
 
@@ -75,6 +76,7 @@ public class SocialMediaFacade {
         commands.put("11", this::undoLastAction);
         commands.put("12", this::showActivity);
         commands.put("13", this::changeFeedSorting);
+        commands.put("14", this::unfollowUser);
     }
 
     private void initializePostFactories() {
@@ -121,9 +123,10 @@ public class SocialMediaFacade {
                     8. View Profile Info
                     9. Follow User
                     10. Like a Post
-                    11. Dislike Last Post Liked
-                    12. View Posts Liked History
+                    11. Undo Last Like
+                    12. View History of Liked Posts
                     13. Change feed sorting
+                    14. Unfollow User
                     0. Exit
                     """);
 
@@ -180,7 +183,7 @@ public class SocialMediaFacade {
             try {
                 Post post = postService.createPost(loggedInUser.getId(), content, factory);
                 notificationService.sendNotification(loggedInUser, "Your post was published!");
-                loggedInUser.notifyObservers(
+                loggedInUser.getFollowManager().notifyObservers(
                         loggedInUser.getUsername() + " published a new post: " + post.getContent()
                 );
                 post.displayPost();
@@ -413,8 +416,8 @@ public class SocialMediaFacade {
             return;
         }
 
-        loggedInUser.follow(target);
-        System.out.println("You are now following " + target.getUsername());
+        loggedInUser.getFollowManager().follow(target.getFollowManager());
+        notificationService.sendNotification(loggedInUser, "You are now following " + target.getUsername());
     }
 
     private void likePost() {
@@ -428,7 +431,7 @@ public class SocialMediaFacade {
             return;
         }
 
-        LikePostCommand cmd = new LikePostCommand(post, loggedInUser);
+        LikePostCommand cmd = new LikePostCommand(post, loggedInUser, likeService);
         commandInvoker.executeCommand(loggedInUser.getId(), cmd);
         if (cmd.wasExecuted()) {
             notificationService.sendNotification(loggedInUser, "The post was liked successfully.");
@@ -463,6 +466,28 @@ public class SocialMediaFacade {
         }
 
         System.out.println("Sorting updated!");
+    }
+
+    private void unfollowUser() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter username to unfollow:");
+        String username = scanner.nextLine();
+
+        User target = userService.getUserByUsername(username);
+
+        if (target == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        if (!loggedInUser.getFollowManager().getFollowing()
+                .contains(target.getFollowManager())) {
+            System.out.println("You are not following this user.");
+            return;
+        }
+
+        loggedInUser.getFollowManager().unfollow(target.getFollowManager());
+        notificationService.sendNotification(loggedInUser, "You unfollowed " + target.getUsername());
     }
 
 }

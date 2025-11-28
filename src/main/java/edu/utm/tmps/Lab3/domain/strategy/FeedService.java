@@ -1,11 +1,9 @@
-package edu.utm.tmps.Lab3.domain.service;
+package edu.utm.tmps.Lab3.domain.strategy;
 
 import edu.utm.tmps.Lab3.domain.model.Post;
-import edu.utm.tmps.Lab3.domain.observer.User;
+import edu.utm.tmps.Lab3.domain.model.User;
 import edu.utm.tmps.Lab3.domain.service.IFeedService;
 import edu.utm.tmps.Lab3.domain.service.IPostService;
-import edu.utm.tmps.Lab3.domain.strategy.IFeedSortingStrategy;
-import edu.utm.tmps.Lab3.domain.strategy.SortByNewestStrategy;
 
 import java.util.ArrayList;
 
@@ -28,9 +26,9 @@ public class FeedService implements IFeedService {
     public ArrayList<Post> retrievePostsUser(String userId) {
         ArrayList<Post> userPosts = new ArrayList<>();
 
-        for (Post p : postService.getPosts()) {
-            if (p.getUserId().equals(userId)) {
-                userPosts.add(p);
+        for (Post post : postService.getPosts()) {
+            if (post.getUserId().equals(userId)) {
+                userPosts.add(post);
             }
         }
 
@@ -39,8 +37,8 @@ public class FeedService implements IFeedService {
 
     @Override
     public Post searchPost(String postId) {
-        for (Post p : postService.getPosts()) {
-            if (p.getId().equals(postId)) return p;
+        for (Post post : postService.getPosts()) {
+            if (post.getId().equals(postId)) return post;
         }
         System.out.println("No such post.");
         return null;

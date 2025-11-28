@@ -3,6 +3,7 @@ package edu.utm.tmps.Lab3.client;
 import edu.utm.tmps.Lab3.domain.facade.SocialMediaFacade;
 import edu.utm.tmps.Lab3.domain.proxy.CachedPostsProxy;
 import edu.utm.tmps.Lab3.domain.service.*;
+import edu.utm.tmps.Lab3.domain.strategy.FeedService;
 
 public class Client {
     public static void main(String[] args) {

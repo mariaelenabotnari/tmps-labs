@@ -2,7 +2,7 @@ package edu.utm.tmps.Lab3.domain.service;
 
 import edu.utm.tmps.Lab3.domain.builder.ProfileBuilder;
 import edu.utm.tmps.Lab3.domain.model.ProfileInfo;
-import edu.utm.tmps.Lab3.domain.observer.User;
+import edu.utm.tmps.Lab3.domain.model.User;
 
 import java.util.HashMap;
 

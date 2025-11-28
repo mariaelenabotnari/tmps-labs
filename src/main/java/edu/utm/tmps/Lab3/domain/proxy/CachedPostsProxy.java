@@ -1,7 +1,7 @@
 package edu.utm.tmps.Lab3.domain.proxy;
 
 import edu.utm.tmps.Lab3.domain.model.Post;
-import edu.utm.tmps.Lab3.domain.observer.User;
+import edu.utm.tmps.Lab3.domain.model.User;
 import edu.utm.tmps.Lab3.domain.service.IFeedService;
 import edu.utm.tmps.Lab3.domain.strategy.IFeedSortingStrategy;
 
