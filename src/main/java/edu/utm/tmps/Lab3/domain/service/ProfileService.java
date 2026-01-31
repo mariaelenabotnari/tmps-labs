@@ -68,8 +68,8 @@ public class ProfileService implements IProfilePictureService, IProfileDetailsSe
         profile.setAppliedFilterPicture(filter);
     }
 
-    private boolean isValidImage(String p) {
-        return p.endsWith(".png") || p.endsWith(".jpg") || p.endsWith(".jpeg");
+    private boolean isValidImage(String picture) {
+        return picture.endsWith(".png") || picture.endsWith(".jpg") || picture.endsWith(".jpeg");
     }
 
 }

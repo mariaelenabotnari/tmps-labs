@@ -4,5 +4,7 @@ import edu.utm.tmps.Lab3.domain.model.User;
 
 public interface IUserService {
     User register(String Username);
-    User getUser(String id);
+    public User login(String username);
+    public User getUserByUsername(String username);
+    User getUserById(String id);
 }

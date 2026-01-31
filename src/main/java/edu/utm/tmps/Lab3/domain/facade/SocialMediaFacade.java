@@ -1,5 +1,8 @@
 package edu.utm.tmps.Lab3.domain.facade;
 
+import edu.utm.tmps.Lab3.domain.command.CommandInvoker;
+import edu.utm.tmps.Lab3.domain.command.LikePostCommand;
+import edu.utm.tmps.Lab3.domain.command.LikePostService;
 import edu.utm.tmps.Lab3.domain.model.Post;
 import edu.utm.tmps.Lab3.domain.model.User;
 import edu.utm.tmps.Lab3.domain.decorator.FilterDecorator;
@@ -9,6 +12,8 @@ import edu.utm.tmps.Lab3.domain.factory.PostFactory;
 import edu.utm.tmps.Lab3.domain.factory.TextPostFactory;
 import edu.utm.tmps.Lab3.domain.factory.VideoPostFactory;
 import edu.utm.tmps.Lab3.domain.service.*;
+import edu.utm.tmps.Lab3.domain.strategy.SortByFollowingOnlyStrategy;
+import edu.utm.tmps.Lab3.domain.strategy.SortByNewestStrategy;
 
 import java.util.*;
 
@@ -20,6 +25,8 @@ public class SocialMediaFacade {
     private final IPostService postService;
     private final IFeedService feedService;
     private final INotificationService notificationService;
+    private final LikePostService likeService = new LikePostService();
+    private final CommandInvoker commandInvoker = new CommandInvoker();
     private final Map<String, PostFactory> postFactories = new HashMap<>();
 
     private User loggedInUser;
@@ -64,6 +71,12 @@ public class SocialMediaFacade {
         commands.put("6", this::editProfilePicture);
         commands.put("7", this::editProfileDetails);
         commands.put("8", this::viewProfile);
+        commands.put("9", this::followUser);
+        commands.put("10", this::likePost);
+        commands.put("11", this::undoLastAction);
+        commands.put("12", this::showActivity);
+        commands.put("13", this::changeFeedSorting);
+        commands.put("14", this::unfollowUser);
     }
 
     private void initializePostFactories() {
@@ -77,14 +90,21 @@ public class SocialMediaFacade {
 
         while (true) {
 
-            System.out.println("\nEnter username (4–30 chars):");
+            System.out.println("\nLogin with an existing username or register with new one:");
             String username = scanner.nextLine();
 
-            try {
-                loggedInUser = userService.register(username);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Error: " + e.getMessage());
-                continue;
+            User existing = userService.login(username);
+
+            if (existing != null) {
+                loggedInUser = existing;
+                System.out.println("Welcome back, " + loggedInUser.getUsername());
+            } else {
+                try {
+                    loggedInUser = userService.register(username);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Error: " + e.getMessage());
+                    continue;
+                }
             }
 
             notificationService.sendNotification(loggedInUser, "Welcome to the app!");
@@ -101,6 +121,12 @@ public class SocialMediaFacade {
                     6. Edit Profile Picture
                     7. Edit Profile Details
                     8. View Profile Info
+                    9. Follow User
+                    10. Like a Post
+                    11. Undo Last Like
+                    12. View History of Liked Posts
+                    13. Change feed sorting
+                    14. Unfollow User
                     0. Exit
                     """);
 
@@ -157,6 +183,9 @@ public class SocialMediaFacade {
             try {
                 Post post = postService.createPost(loggedInUser.getId(), content, factory);
                 notificationService.sendNotification(loggedInUser, "Your post was published!");
+                loggedInUser.getFollowManager().notifyObservers(
+                        loggedInUser.getUsername() + " published a new post: " + post.getContent()
+                );
                 post.displayPost();
             } catch (IllegalArgumentException ex) {
                 System.out.println("Error: " + ex.getMessage());
@@ -173,9 +202,9 @@ public class SocialMediaFacade {
     }
 
     private void searchPost() {
-        Scanner sc = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
         System.out.println("Enter post ID (example: post-text-1/post-vid-1/post-img-1):");
-        String id = sc.nextLine();
+        String id = scanner.nextLine();
 
         Post post = feedService.searchPost(id);
         if (post != null) {
@@ -185,7 +214,7 @@ public class SocialMediaFacade {
 
     private void viewFeed() {
         System.out.println("Your feed:");
-        ArrayList<Post> posts = feedService.retrieveAllPosts();
+        ArrayList<Post> posts = feedService.retrieveFeed(loggedInUser);
         posts.forEach(p -> System.out.println(p.getUserId() + ": " + p.getContent()));
     }
 
@@ -282,7 +311,7 @@ public class SocialMediaFacade {
     }
 
     private void editProfileDetails() {
-        Scanner sc = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
 
         IProfileDetailsService detailsService =
                 (IProfileDetailsService) loggedInUser.getProfileService();
@@ -295,7 +324,7 @@ public class SocialMediaFacade {
         0. Go back
         """);
 
-        String choice = sc.nextLine();
+        String choice = scanner.nextLine();
         if (choice.equals("0")) return;
 
         Map<String, Runnable> detailCommands = new HashMap<>();
@@ -303,7 +332,7 @@ public class SocialMediaFacade {
         detailCommands.put("1", () -> {
             while (true) {
                 System.out.println("Enter new age:");
-                Integer age = readIntegerOrNull(sc.nextLine());
+                Integer age = readIntegerOrNull(scanner.nextLine());
 
                 if (age == null) {
                     System.out.println("Age must be a number. Try again.");
@@ -324,7 +353,7 @@ public class SocialMediaFacade {
         detailCommands.put("2", () -> {
             while (true) {
                 System.out.println("Enter new biography:");
-                String biography = sc.nextLine();
+                String biography = scanner.nextLine();
                 try {
                     detailsService.addBiography(biography);
                     notificationService.sendNotification(loggedInUser, "Biography updated successfully.");
@@ -338,7 +367,7 @@ public class SocialMediaFacade {
         detailCommands.put("3", () -> {
             while (true) {
                 System.out.println("Enter new location:");
-                String location = sc.nextLine();
+                String location = scanner.nextLine();
                 try {
                     detailsService.addLocation(location);
                     notificationService.sendNotification(loggedInUser, "Location updated successfully.");
@@ -368,4 +397,97 @@ public class SocialMediaFacade {
         try { return Integer.parseInt(s); }
         catch (Exception e) { return null; }
     }
+
+    private void followUser() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Enter username to follow:");
+        String targetUsername = scanner.nextLine();
+
+        User target = userService.getUserByUsername(targetUsername);
+
+        if (target == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        if (target.getUsername().equals(loggedInUser.getUsername())) {
+            System.out.println("You cannot follow yourself.");
+            return;
+        }
+
+        loggedInUser.getFollowManager().follow(target.getFollowManager());
+        notificationService.sendNotification(loggedInUser, "You are now following " + target.getUsername());
+    }
+
+    private void likePost() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter post ID to like:");
+        String id = scanner.nextLine();
+
+        Post post = feedService.searchPost(id);
+        if (post == null) {
+            System.out.println("Post not found.");
+            return;
+        }
+
+        LikePostCommand cmd = new LikePostCommand(post, loggedInUser, likeService);
+        commandInvoker.executeCommand(loggedInUser.getId(), cmd);
+        if (cmd.wasExecuted()) {
+            notificationService.sendNotification(loggedInUser, "The post was liked successfully.");
+        }
+    }
+
+    private void undoLastAction() {
+        commandInvoker.undoLast(loggedInUser.getId());
+    }
+
+    private void showActivity() {
+        commandInvoker.showHistory(loggedInUser.getId());
+    }
+
+    private void changeFeedSorting() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("""
+    Choose feed sorting:
+    1. Newest posts
+    2. Only posts from users you follow
+    """);
+
+        String choice = scanner.nextLine();
+
+        switch (choice) {
+            case "1" -> feedService.setSortingStrategy(new SortByNewestStrategy());
+            case "2" -> feedService.setSortingStrategy(new SortByFollowingOnlyStrategy());
+            default -> {
+                System.out.println("Invalid choice.");
+                return;
+            }
+        }
+
+        System.out.println("Sorting updated!");
+    }
+
+    private void unfollowUser() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter username to unfollow:");
+        String username = scanner.nextLine();
+
+        User target = userService.getUserByUsername(username);
+
+        if (target == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        if (!loggedInUser.getFollowManager().getFollowing()
+                .contains(target.getFollowManager())) {
+            System.out.println("You are not following this user.");
+            return;
+        }
+
+        loggedInUser.getFollowManager().unfollow(target.getFollowManager());
+        notificationService.sendNotification(loggedInUser, "You unfollowed " + target.getUsername());
+    }
+
 }

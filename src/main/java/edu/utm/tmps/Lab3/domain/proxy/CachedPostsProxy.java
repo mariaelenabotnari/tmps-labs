@@ -1,60 +1,68 @@
 package edu.utm.tmps.Lab3.domain.proxy;
 
 import edu.utm.tmps.Lab3.domain.model.Post;
+import edu.utm.tmps.Lab3.domain.model.User;
 import edu.utm.tmps.Lab3.domain.service.IFeedService;
+import edu.utm.tmps.Lab3.domain.strategy.IFeedSortingStrategy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class CachedPostsProxy implements IFeedService {
 
-    private final IFeedService feedService;
+    private final IFeedService feed;
 
-    private ArrayList<Post> cachedAll = null;
-    private HashMap<String, ArrayList<Post>> cachedByUser = new HashMap<>();
+    private ArrayList<Post> cachedFeed = null;
+    private HashMap<String, ArrayList<Post>> cachedUser = new HashMap<>();
     private HashMap<String, Post> cachedSearch = new HashMap<>();
 
-    public CachedPostsProxy(IFeedService feedService) {
-        this.feedService = feedService;
-    }
+    public CachedPostsProxy(IFeedService feed) { this.feed = feed; }
 
     @Override
-    public ArrayList<Post> retrieveAllPosts() {
-        if (cachedAll == null) {
-            System.out.println("Cache MISS: retrieving all posts...");
-            cachedAll = feedService.retrieveAllPosts();
+    public ArrayList<Post> retrieveFeed(User currentUser) {
+        clearCache();
+
+        if (cachedFeed == null) {
+            System.out.println("Cache MISS: FEED");
+            cachedFeed = feed.retrieveFeed(currentUser);
         } else {
-            System.out.println("Cache HIT: retrieving all posts from cache.");
+            System.out.println("Cache HIT: FEED");
         }
-        return cachedAll;
+        return cachedFeed;
     }
 
     @Override
     public ArrayList<Post> retrievePostsUser(String userId) {
-        if (!cachedByUser.containsKey(userId)) {
-            System.out.println("Cache MISS: retrieving posts for user " + userId);
-            cachedByUser.put(userId, feedService.retrievePostsUser(userId));
+        if (!cachedUser.containsKey(userId)) {
+            System.out.println("Cache MISS: user " + userId);
+            cachedUser.put(userId, feed.retrievePostsUser(userId));
         } else {
-            System.out.println("Cache HIT: retrieving posts for user " + userId);
+            System.out.println("Cache HIT: user " + userId);
         }
-        return cachedByUser.get(userId);
+        return cachedUser.get(userId);
     }
 
     @Override
     public Post searchPost(String postId) {
         if (!cachedSearch.containsKey(postId)) {
-            System.out.println("Cache MISS: searching post " + postId);
-            Post post = feedService.searchPost(postId);
-            cachedSearch.put(postId, post);
+            System.out.println("Cache MISS: post " + postId);
+            cachedSearch.put(postId, feed.searchPost(postId));
         } else {
-            System.out.println("Cache HIT: searching post " + postId + " from cache.");
+            System.out.println("Cache HIT: post " + postId);
         }
         return cachedSearch.get(postId);
     }
 
+    @Override
+    public void setSortingStrategy(IFeedSortingStrategy strategy) {
+        clearCache();
+        feed.setSortingStrategy(strategy);
+    }
+
     public void clearCache() {
-        cachedAll = null;
-        cachedByUser.clear();
+        cachedFeed = null;
+        cachedUser.clear();
         cachedSearch.clear();
     }
 }
+
